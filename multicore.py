@@ -83,9 +83,12 @@ class Multicore_Weather_Wind:
 				
 	
 	def calculate_wind_speed_m_s(self, average_tick_ms: float) -> float:
-		rotation_hz = (1000 / average_tick_ms) / 2
-		circumference = self.WIND_CM_RADIUS * 2.0 * pi
-		wind_m_s = rotation_hz * circumference * self.WIND_FACTOR
+		if average_tick_ms == 0:
+			wind_m_s = 0
+		else:
+			rotation_hz = (1000 / average_tick_ms) / 2
+			circumference = self.WIND_CM_RADIUS * 2.0 * pi
+			wind_m_s = rotation_hz * circumference * self.WIND_FACTOR
 		
 		return wind_m_s
 
