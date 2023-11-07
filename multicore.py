@@ -10,6 +10,7 @@ class Multicore_Weather_Wind:
 		self.quarterseconds_lock = _thread.allocate_lock()
 		self.wind_speed_pin = Pin(9, Pin.IN, Pin.PULL_UP)
 		self.quarterseconds = [[]] * (60 * 4)
+		self.quarterseconds_max_list_id = len(self.quarterseconds) - 1
 		self.WIND_CM_RADIUS = 7.0
 		self.WIND_FACTOR = 0.0218
 		self.pending_wind_data = []
@@ -42,13 +43,13 @@ class Multicore_Weather_Wind:
 		
 		return ticks
 	
-	def record_quartersecond_datapoint(self, qs) -> None:
+	def record_quartersecond_datapoint(self, quartersecond_id) -> None:
 		ticks = self.quartersecond_wind_poll()
 		self.quarterseconds_lock.acquire()
-		self.quarterseconds[qs] = ticks
+		self.quarterseconds[quartersecond_id] = ticks
 		self.quarterseconds_lock.release()
 		if self.debug:
-			print("qs: {} has value: {}".format(qs, self.quarterseconds[qs]))
+			print("Quartersecond: {} has value: {}".format(quartersecond_id, self.quarterseconds[quartersecond_id]))
 		
 	def append_pending_wind_data(self, wind_data) -> None:
 		self.pending_wind_data_lock.acquire()
@@ -65,19 +66,19 @@ class Multicore_Weather_Wind:
 	
 	def constant_poll_wind_speed(self) -> None:
 		self.previous_loop_time = ticks_ms()
-		qs = 0
+		quartersecond_id = 0
 		
 		while (True):
 			if self.last_loop_overhead > 0:
 				self.discard_overhead_compensation_poll()
-				qs += 1
+				quartersecond_id += 1
 			else:
-				self.record_quartersecond_datapoint(qs)
+				self.record_quartersecond_datapoint(quartersecond_id)
 			
-			if qs < 239:
-				qs += 1
+			if quartersecond_id < self.quarterseconds_max_list_id:
+				quartersecond_id += 1
 			else:
-				qs = 0
+				quartersecond_id = 0
 				self.append_pending_wind_data(self.process_wind_data())
 				self.calculate_processing_overhead()
 				
