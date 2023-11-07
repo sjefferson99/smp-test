@@ -45,9 +45,9 @@ class Multicore_Weather_Wind:
 	
 	def record_quartersecond_datapoint(self, quartersecond_id) -> None:
 		ticks = self.quartersecond_wind_poll()
-		self.quarterseconds_lock.acquire()
-		self.quarterseconds[quartersecond_id] = ticks
-		self.quarterseconds_lock.release()
+		with self.quarterseconds_lock:
+			self.quarterseconds[quartersecond_id] = ticks
+
 		if self.debug:
 			print("Quartersecond {} has value: {}".format(quartersecond_id, self.quarterseconds[quartersecond_id]))
 		
