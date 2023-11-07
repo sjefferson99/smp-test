@@ -49,7 +49,7 @@ class Multicore_Weather_Wind:
 		self.quarterseconds[quartersecond_id] = ticks
 		self.quarterseconds_lock.release()
 		if self.debug:
-			print("Quartersecond: {} has value: {}".format(quartersecond_id, self.quarterseconds[quartersecond_id]))
+			print("Quartersecond {} has value: {}".format(quartersecond_id, self.quarterseconds[quartersecond_id]))
 		
 	def append_pending_wind_data(self, wind_data) -> None:
 		self.pending_wind_data_lock.acquire()
