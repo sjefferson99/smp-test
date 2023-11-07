@@ -22,14 +22,11 @@ class Multicore_Weather_Wind:
 
 	def discard_overhead_compensation_poll(self) -> None:		
 		if self.last_loop_overhead >= 250:
-			correction = 0
 			self.last_loop_overhead -= 250
 		else:
-			correction = self.last_loop_overhead
-		
-		start = ticks_ms()
-		while ticks_diff(ticks_ms(), start) <= 250 - correction:
-			pass
+			start = ticks_ms()
+			while ticks_diff(ticks_ms(), start) <= 250 - self.last_loop_overhead:
+				pass
 		
 		self.processing_overhead_poll_count += 1
 	
@@ -74,8 +71,8 @@ class Multicore_Weather_Wind:
 			if self.last_loop_overhead > 0:
 				self.discard_overhead_compensation_poll()
 				qs += 1
-			
-			self.record_quartersecond_datapoint(qs)
+			else:
+				self.record_quartersecond_datapoint(qs)
 			
 			if qs < 239:
 				qs += 1
