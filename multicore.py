@@ -52,9 +52,8 @@ class Multicore_Weather_Wind:
 			print("Quartersecond {} has value: {}".format(quartersecond_id, self.quarterseconds[quartersecond_id]))
 		
 	def append_pending_wind_data(self, wind_data) -> None:
-		self.pending_wind_data_lock.acquire()
-		self.pending_wind_data.append(wind_data)
-		self.pending_wind_data_lock.release()
+		with self.pending_wind_data_lock:
+			self.pending_wind_data.append(wind_data)
 	
 	def calculate_processing_overhead(self) -> None:
 		time_now = ticks_ms()
@@ -120,9 +119,8 @@ class Multicore_Weather_Wind:
 		return gust_wind_speed
 
 	def cache_quarterseconds(self) -> None:
-		self.quarterseconds_lock.acquire()
-		self.cached_quarterseconds = self.quarterseconds
-		self.quarterseconds_lock.release()
+		with self.quarterseconds_lock:
+			self.cached_quarterseconds = self.quarterseconds
 	
 	def remove_processing_overhead_data_polls(self) -> None:
 		self.cached_quarterseconds = self.cached_quarterseconds[0 + self.processing_overhead_poll_count : -1]
@@ -140,20 +138,17 @@ class Multicore_Weather_Wind:
 		"""
 		Returns a list of dictionaries {"timestamp" : time, "avg_speed" : wind_data[0], "gust_speed" : wind_data[1]}
 		"""
-		self.pending_wind_data_lock.acquire()
-		pending_data = self.pending_wind_data
-		self.pending_wind_data_lock.release()
+		with self.pending_wind_data_lock:
+			pending_data = self.pending_wind_data
 		
 		return pending_data
 	
 	def clear_pending_data(self) -> None:
-		self.pending_wind_data_lock.acquire()
-		self.pending_wind_data = []
-		self.pending_wind_data_lock.release()
+		with self.pending_wind_data_lock:
+			self.pending_wind_data = []
 	
 	def check_pending_wind_data_length(self) -> int:
-		self.pending_wind_data_lock.acquire()
-		length = len(self.pending_wind_data)
-		self.pending_wind_data_lock.release()
+		with self.pending_wind_data_lock:
+			length = len(self.pending_wind_data)
 
 		return length
